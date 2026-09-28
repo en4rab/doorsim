@@ -1227,14 +1227,14 @@ void setup() {
   printWelcomeMessage();
 
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send_P(200, "text/html", index_html);
+    request->send(200, "text/html", index_html);
   });
 
   server.on("/getCards", HTTP_GET, [](AsyncWebServerRequest *request) {
-      DynamicJsonDocument doc(4096);
+      JsonDocument doc;
       JsonArray cards = doc.to<JsonArray>();
       for (int i = 0; i < cardDataIndex; i++) {
-          JsonObject card = cards.createNestedObject();
+          JsonObject card = cards.add<JsonObject>();
           card["bitCount"] = cardDataArray[i].bitCount;
           card["facilityCode"] = cardDataArray[i].facilityCode;
           card["cardNumber"] = cardDataArray[i].cardNumber;
@@ -1249,10 +1249,10 @@ void setup() {
   });
 
   server.on("/getUsers", HTTP_GET, [](AsyncWebServerRequest *request) {
-      DynamicJsonDocument doc(4096);
+      JsonDocument doc;
       JsonArray users = doc.to<JsonArray>();
       for (int i = 0; i < validCount; i++) {
-          JsonObject user = users.createNestedObject();
+          JsonObject user = users.add<JsonObject>();
           user["facilityCode"] = credentials[i].facilityCode;
           user["cardNumber"] = credentials[i].cardNumber;
           user["name"] = credentials[i].name;
@@ -1263,7 +1263,7 @@ void setup() {
   });
 
   server.on("/getSettings", HTTP_GET, [](AsyncWebServerRequest *request) {
-      DynamicJsonDocument doc(2048);
+      JsonDocument doc;
       doc["mode"] = MODE;
       doc["displayTimeout"] = displayTimeout;
       doc["apSsid"] = ap_ssid;
@@ -1344,17 +1344,17 @@ void setup() {
   });
 
   server.on("/exportData", HTTP_GET, [](AsyncWebServerRequest *request) {
-    DynamicJsonDocument doc(4096);
-    JsonArray users = doc.createNestedArray("users");
+    JsonDocument doc;
+    JsonArray users = doc["users"].to<JsonArray>();
     for (int i = 0; i < validCount; i++) {
-        JsonObject user = users.createNestedObject();
+        JsonObject user = users.add<JsonObject>();
         user["facilityCode"] = credentials[i].facilityCode;
         user["cardNumber"] = credentials[i].cardNumber;
         user["name"] = credentials[i].name;
     }
-    JsonArray cards = doc.createNestedArray("cards");
+    JsonArray cards = doc["cards"].to<JsonArray>();
     for (int i = 0; i < cardDataIndex; i++) {
-        JsonObject card = cards.createNestedObject();
+        JsonObject card = cards.add<JsonObject>();
         card["bitCount"] = cardDataArray[i].bitCount;
         card["facilityCode"] = cardDataArray[i].facilityCode;
         card["cardNumber"] = cardDataArray[i].cardNumber;
